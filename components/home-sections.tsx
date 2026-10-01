@@ -1,0 +1,52 @@
+import Image from 'next/image';
+import Link from 'next/link';
+import { categories } from '@/lib/content';
+import { whatsappUrl } from '@/lib/config';
+import { Arrow } from './brand';
+import { WhatsAppCTA } from './whatsapp-cta';
+import { OpenTrackingLink } from './open-tracking-link';
+
+const art = ['photo-1581578731548-c64695cc6952', 'photo-1504307651254-35680f356dfd', 'photo-1621905251918-48416bd8575a', 'photo-1521737711867-e3b97375f902'];
+const img = (id: string, w = 1000) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=82`;
+
+export function Hero() {
+  return <section className="hero"><div className="hero-glow"/><div className="wrap hero-grid"><div className="hero-copy"><span className="eyebrow"><i/> A better way to find helping hands</span><h1>Reliable workforce.<br/><em>Whenever you need it.</em></h1><p>From home services to business teams, ONECREW connects you with the people who can get the job done.</p><div className="hero-actions"><WhatsAppCTA /><Link className="button button-outline" href="/services">Explore services <Arrow /></Link></div><div className="hero-proof"><div className="proof-avatars"><b>H</b><b>S</b><b>B</b></div><span><strong>One crew for every kind of work.</strong><br/>Simple requests. Real people.</span></div></div>
+    <div className="hero-visual"><div className="hero-photo"><Image src={img('photo-1504307651254-35680f356dfd', 1300)} alt="A skilled worker ready for the day" fill priority sizes="(max-width: 900px) 100vw, 54vw"/><div className="photo-tint"/></div><div className="hero-photo-label"><span className="label-dot"/><div><b>Good work starts here</b><small>People ready to help</small></div><span className="label-arrow">↗</span></div><div className="float-card float-top"><span className="mini-icon">01</span><div><b>Many skills.</b><small>One trusted place.</small></div></div><div className="float-card float-bottom"><div className="float-mark">✳</div><div><b>Your day, made easier.</b><small>Tell us what you need</small></div></div><div className="visual-corner corner-a"/><div className="visual-corner corner-b"/></div>
+  </div><div className="wrap hero-note"><span>Home</span><i/><span>Work</span><i/><span>Business</span><i/><span>ONECREW</span><span className="note-line"/></div></section>;
+}
+
+export function CategorySection() {
+  return <section className="section categories-section" id="services"><div className="wrap"><div className="section-heading"><div><span className="eyebrow">What can we help with?</span><h2>Workforce for<br/><em>every kind of need.</em></h2></div><div className="heading-aside"><p>From everyday household tasks to business workforce requirements, find the right people for the job.</p><Link className="text-link" href="/services">Explore all services <Arrow /></Link></div></div>
+    <div className="category-grid">{categories.map((c, i) => <article className={`category-card category-${i + 1}`} key={c.title}><div className="category-top"><span className="card-index">{c.number} / 04</span><span className="category-icon">{['⌂', '✳', '⌁', '▦'][i]}</span></div><h3>{c.title}</h3><p>{c.intro}</p><ul>{c.items.map(item => <li key={item}><i/> {item}</li>)}</ul><a href={whatsappUrl(c.message)} target="_blank" rel="noreferrer" className="card-link">{['Book home service', 'Hire daily labour', 'Find skilled worker', 'Hire workforce'][i]} <Arrow /></a></article>)}</div>
+  </div></section>;
+}
+
+export function RhythmSection() {
+  const items = [['01', 'One-day workers', 'A helping hand for a one-day requirement.'], ['02', 'Hourly workers', 'Flexible support for a shorter job.'], ['03', 'Weekly contracts', 'Workforce for ongoing requirements.'], ['04', 'Urgent requests', 'Tell us what you need, as soon as you can.']];
+  return <section className="section rhythm-section"><div className="wrap rhythm-grid"><div className="rhythm-copy"><span className="eyebrow eyebrow-light">People, when you need them</span><h2>Workforce<br/><em>that works<br/>around you.</em></h2><p>Whether it’s a few hours, a day, a week or an urgent requirement, tell us what would make your day easier.</p><WhatsAppCTA message="Hi ONECREW, I need workforce for a specific duration." /></div><div className="rhythm-cards">{items.map(([n, title, copy]) => <div key={n} className="rhythm-card"><span>{n}</span><div><h3>{title}</h3><p>{copy}</p></div><Arrow diagonal /></div>)}</div></div></section>;
+}
+
+export function HowItWorks() {
+  const steps = [['01', 'Tell us what you need', 'Choose a service or send ONECREW a message on WhatsApp.'], ['02', 'Share the details', 'Let us know the location, timing and kind of support you need.'], ['03', 'Get connected', 'We’ll help connect you with suitable workforce for the job.']];
+  return <section className="section how-section" id="how-it-works"><div className="wrap"><div className="section-heading centered"><span className="eyebrow">Good work, made simple</span><h2>Three steps.<br/><em>One less thing to worry about.</em></h2><p>Getting started should feel as easy as asking for a hand.</p></div><div className="steps-grid">{steps.map(([n, title, copy]) => <article key={n} className="step-card"><span className="step-number">{n}</span><div className="step-connector"/><h3>{title}</h3><p>{copy}</p></article>)}</div><div className="center-cta"><WhatsAppCTA>Start booking on WhatsApp</WhatsAppCTA></div></div></section>;
+}
+
+export function WhySection() {
+  const items = [['✓', 'Thoughtful matching', 'We take time to understand what your job calls for.'], ['↗', 'Easy to get started', 'Send a request in a few taps, right in WhatsApp.'], ['◷', 'Flexible arrangements', 'Ask about hourly, daily or weekly workforce.'], ['⌂', 'For home and work', 'Support for personal tasks and business needs.'], ['◉', 'A human point of contact', 'Talk through your requirements with our team.'], ['＋', 'Room to grow', 'Find work opportunities or build your business team.']];
+  return <section className="section why-section"><div className="wrap why-grid"><div className="why-intro"><span className="eyebrow">The ONECREW difference</span><h2>A little help<br/>can go <em>a long way.</em></h2><p>Work is better when the right people and the right needs come together.</p><Link href="/about" className="text-link">Get to know us <Arrow /></Link><div className="puzzle-stamp" aria-hidden="true"><i/><i/><i/><i/></div></div><div className="why-cards">{items.map(([icon, title, copy]) => <article className="why-card" key={title}><span className="why-icon">{icon}</span><h3>{title}</h3><p>{copy}</p></article>)}</div></div></section>;
+}
+
+export function BusinessSection() {
+  const roles = ['Warehouse workers', 'Office assistants', 'Event staff', 'Delivery helpers', 'Temporary workforce', 'Loading & unloading'];
+  return <section className="section business-section"><div className="wrap business-grid"><div className="business-image"><Image src={img('photo-1521737711867-e3b97375f902', 1200)} alt="A team working together in a business setting" fill sizes="(max-width: 900px) 100vw, 50vw"/><div className="business-image-wash"/><div className="image-caption"><span>For teams that keep moving</span><b>Good people.<br/>Good work.</b></div><span className="business-stamp">ONE<br/>CREW</span></div><div className="business-copy"><span className="eyebrow">For businesses</span><h2>Workforce solutions<br/><em>for your business.</em></h2><p>From warehouse helpers and event staff to office assistants and temporary workers, we help businesses access workforce support when they need it.</p><div className="role-grid">{roles.map(r => <span key={r}><i/> {r}</span>)}</div><WhatsAppCTA message="Hi ONECREW, I need workforce support for my business." >Hire workforce for your business</WhatsAppCTA></div></div></section>;
+}
+
+export function JoinSection() {
+  return <section className="section join-section"><div className="wrap join-panel"><div className="join-text"><span className="eyebrow eyebrow-light">Your next opportunity</span><h2>Good people<br/>belong <em>together.</em></h2><p>Looking for work? Join the ONECREW network and tell us about the skills you bring.</p><Link className="button button-white" href="/careers">Explore careers <Arrow /></Link></div><div className="join-art"><Image src={img('photo-1551836022-d5d88e9218df', 1000)} alt="Colleagues sharing a moment at work" fill sizes="(max-width: 800px) 100vw, 40vw"/><div className="join-art-mark">✳</div></div></div></section>;
+}
+
+export function TrackSection() { return <section className="track-section"><div className="wrap track-inner"><div><span className="eyebrow">Need an update?</span><h2>Already booked with ONECREW?</h2><p>Use the secure tracking link we sent to your WhatsApp to check your booking status.</p><OpenTrackingLink /></div><a className="button button-outline" href={whatsappUrl('Hi ONECREW, could I get help finding the tracking link for my booking?')} target="_blank" rel="noreferrer">Need help? Message us <Arrow diagonal /></a></div></section>; }
+
+export function EmergencySection() { return <section className="section emergency-section" id="urgent"><div className="emergency-shapes"><i/><i/><i/><i/></div><div className="wrap emergency-inner"><span className="eyebrow eyebrow-light">Plans can change</span><h2>Need workforce<br/><em>urgently?</em></h2><p>Tell ONECREW what you need and we’ll help you find the right workforce for the situation.</p><WhatsAppCTA message="Hi ONECREW, I need emergency workforce assistance.">Get emergency help</WhatsAppCTA></div><span className="emergency-side">HERE WHEN YOU NEED A HAND</span></section>; }
+
+export function FAQPreview() { return <section className="section faq-preview"><div className="wrap faq-preview-grid"><div><span className="eyebrow">Good questions</span><h2>Need to know<br/><em>a little more?</em></h2><p>Find quick answers about booking, work opportunities and how ONECREW works.</p><Link className="text-link" href="/faq">Visit all FAQs <Arrow /></Link></div><div className="faq-preview-list">{[['How do I book a worker?', 'Start a conversation with ONECREW on WhatsApp and tell us what kind of help you need.'], ['Do I need to create an account?', 'No account needed. Your request starts directly in WhatsApp.'], ['Can businesses hire workers?', 'Yes. Get in touch to discuss the workforce your business needs.']].map(([q, a], i) => <details key={q} open={i === 0}><summary>{q}<b>+</b></summary><p>{a}</p></details>)}</div></div></section>; }

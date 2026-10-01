@@ -1,0 +1,6 @@
+import type { Metadata } from 'next';
+import { PageIntro } from '@/components/page-intro';
+import { CareerForm } from '@/components/forms';
+export const metadata: Metadata = { title: 'Careers', description: 'Find work opportunities with ONECREW. Apply as a skilled, general or temporary worker.' };
+const roles = [['Skilled workers', ['Electricians', 'Plumbers', 'Carpenters', 'AC technicians', 'Welders', 'Painters', 'Other skilled professionals']], ['General workers', ['Helpers', 'Loading & unloading', 'Construction helpers', 'Cleaning workers', 'Moving workers', 'Delivery helpers', 'Other general workforce']]];
+export default function Careers() { return <><PageIntro eyebrow="Join ONECREW" title="Good work starts with good people." copy="Tell us what you do, where you work and what kind of opportunity you’re looking for." /><section className="inner-content"><div className="wrap"><div className="career-role-grid">{roles.map(([title,list]) => <article className="career-role-card" key={title as string}><span className="eyebrow">Work opportunities</span><h2>{title as string}</h2><ul>{(list as string[]).map(x => <li key={x}><i/> {x}</li>)}</ul></article>)}</div><CareerForm /></div></section></>; }
