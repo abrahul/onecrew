@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   const status = p.get('status'); const payment = p.get('payment'); const serviceId = p.get('serviceId'); const workerId = p.get('workerId'); const date = p.get('date');
   const where: Prisma.BookingWhereInput = {};
   if (status && statuses.includes(status as typeof statuses[number])) where.status = status as BookingStatus;
-  if (payment && Object.values(PaymentStatus).includes(payment as PaymentStatus)) where.paymentStatus = payment;
+  if (payment && Object.values(PaymentStatus).includes(payment as PaymentStatus)) where.paymentStatus = payment as PaymentStatus;
   if (serviceId) where.serviceId = serviceId;
   if (workerId) where.assignedWorkerId = workerId;
   if (date && /^\d{4}-\d\d-\d\d$/.test(date)) where.serviceDate = new Date(`${date}T00:00:00.000Z`);

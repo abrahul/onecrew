@@ -11,7 +11,7 @@ export async function PATCH(request: NextRequest, context: { params: { id: strin
   if (typeof b.status === 'string') { if (!Object.values(WorkerStatus).includes(b.status as WorkerStatus)) return badRequest('Select a valid worker status.'); data.status = b.status as WorkerStatus; }
   if (b.status === 'AVAILABLE' || b.status === 'OFFLINE' || b.status === 'INACTIVE') {
     const activeAssignment = await db.booking.findFirst({ where: { assignedWorkerId: current.id, status: { in: ['ASSIGNED', 'WORKER_ON_THE_WAY', 'WORK_STARTED'] } }, select: { id: true } });
-    if (activeAssignment && b.status !== 'BUSY') return badRequest('This worker has an active job. Complete or cancel the booking before changing availability.');
+    if (activeAssignment) return badRequest('This worker has an active job. Complete or cancel the booking before changing availability.');
   }
   if (typeof b.fullName === 'string') data.fullName = b.fullName.trim().slice(0, 140);
   if (typeof b.phone === 'string') data.phone = b.phone.replace(/[^+\d]/g, '').slice(0, 24);
