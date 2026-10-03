@@ -1,0 +1,2 @@
+import { NextResponse } from 'next/server'; import { db } from '@/lib/db'; import { authenticatedAdmin } from '@/lib/admin-api';
+export async function GET(){if(process.env.NODE_ENV==='production'||(process.env.WHATSAPP_PROVIDER??'mock')!=='mock')return new NextResponse(null,{status:404});if(!await authenticatedAdmin())return new NextResponse(null,{status:401});return NextResponse.json(await db.whatsAppConversation.findMany({include:{messages:{orderBy:{createdAt:'asc'}}},orderBy:{lastMessageAt:'desc'}}))}
