@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Brand } from './brand';
 import { WhatsAppCTA } from './whatsapp-cta';
@@ -7,6 +7,10 @@ import { WhatsAppCTA } from './whatsapp-cta';
 const links = [['Services', '/services'], ['How it works', '/#how-it-works'], ['About', '/about'], ['Careers', '/careers'], ['FAQ', '/faq'], ['Contact', '/contact']];
 export function Header() {
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    document.body.classList.toggle('menu-is-open', open);
+    return () => document.body.classList.remove('menu-is-open');
+  }, [open]);
   return <header className="site-header"><div className="header-inner wrap"><Brand />
     <nav className={`main-nav ${open ? 'nav-open' : ''}`} aria-label="Main navigation">
       <Link href="/" onClick={() => setOpen(false)}>Home</Link>{links.map(([label, href]) => <Link key={label} href={href} onClick={() => setOpen(false)}>{label}</Link>)}

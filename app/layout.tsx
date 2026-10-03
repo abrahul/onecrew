@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import './operations.css';
+import './mobile.css';
 import { PublicHeader, PublicFooter } from '@/components/public-chrome';
 import { business } from '@/lib/config';
 
