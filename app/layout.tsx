@@ -1,9 +1,15 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import './operations.css';
 import './mobile.css';
 import { PublicHeader, PublicFooter } from '@/components/public-chrome';
 import { business } from '@/lib/config';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(business.siteUrl),
