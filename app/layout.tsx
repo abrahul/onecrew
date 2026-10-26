@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import './operations.css';
 import './mobile.css';
+import './refresh.css';
 import { PublicHeader, PublicFooter } from '@/components/public-chrome';
 import { business } from '@/lib/config';
 

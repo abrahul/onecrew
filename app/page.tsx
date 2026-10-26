@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { Hero, CategorySection, RhythmSection, HowItWorks, WhySection, BusinessSection, JoinSection, TrackSection, EmergencySection, FAQPreview } from '@/components/home-sections';
+import { CategorySection, RhythmSection, HowItWorks, WhySection, BusinessSection, JoinSection, TrackSection, EmergencySection, FAQPreview } from '@/components/home-sections';
+import { HomeHero as Hero } from '@/components/home-hero';
 import { WhatsAppCTA } from '@/components/whatsapp-cta';
 
 export const metadata: Metadata = { title: 'Workforce for Homes & Businesses', description: 'Reliable workers for home services, daily labour, skilled jobs and business support. Book your workforce through WhatsApp with ONECREW.' };
