@@ -5,7 +5,7 @@
   "scripts": {
     "test:whatsapp": "tsx --test tests/whatsapp.test.ts",
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "db:generate": "prisma generate",
