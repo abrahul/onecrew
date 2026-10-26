@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "test:whatsapp": "tsx --test tests/whatsapp.test.ts",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

@@ -146,6 +146,9 @@ model WhatsAppMessage {
   messageType WhatsAppMessageType @default(TEXT)
   content String
   metadata Json?
+  sendState String?
+  deliveryStatus String?
+  deliveryTimestamp BigInt?
   createdAt DateTime @default(now())
   @@index([conversationId, createdAt])
 }

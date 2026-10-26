@@ -1,5 +1,7 @@
 # ONECREW
 
+Production WhatsApp Cloud API setup, webhook verification, migrations and delivery recovery: [deployment guide](docs/whatsapp-deployment.md).
+
 ONECREW combines a public service website with a private operations dashboard and secure, account-free booking tracking. WhatsApp remains the request and payment-instruction channel; an admin verifies payment and manually creates every official booking.
 
 ## Configure
@@ -28,6 +30,6 @@ For a deployment, apply committed migrations with `npm run db:migrate`, generate
 - Tracking pages look up only the random token and return a limited set of fields. The token can be rotated from booking details, invalidating any prior link.
 - Admin sessions use random, database-backed opaque tokens in HTTP-only, same-site cookies. Passwords are bcrypt hashed, mutating requests require same-origin headers, and login attempts are rate-limited in PostgreSQL.
 - Career and worker images/documents use randomized storage names, file signature checks, upload size limits and private downloads behind admin authorization. On serverless hosting, point `PRIVATE_UPLOAD_DIR` to a persistent private volume or replace the storage adapter with private object storage.
-- No payment gateway, WhatsApp-to-database webhook, customer account or live GPS feed is implemented.
+- The Meta WhatsApp webhook records enquiries and unverified payment confirmations. No payment gateway, automatic booking creation, customer account or live GPS feed is implemented.
 
 The original website brief did not include a logo asset or verified contact details. The current UI uses a temporary blue/navy mark; replace it and the placeholder environment values with ONECREW’s approved assets before publishing.

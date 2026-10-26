@@ -1,2 +1,2 @@
-export type OutboundMessage = { phone:string; content:string; type?:'TEXT'|'BUTTONS'|'LIST'|'IMAGE'|'TEMPLATE'|'SYSTEM'; metadata?:Record<string, unknown> };
-export interface WhatsAppProvider { sendText(message:OutboundMessage):Promise<void>; sendButtons(message:OutboundMessage):Promise<void>; sendList(message:OutboundMessage):Promise<void>; sendImage(message:OutboundMessage):Promise<void>; sendTemplate(message:OutboundMessage):Promise<void>; }
+export type OutboundMessage = { phone:string; content:string; logId?:string; type?:'TEXT'|'BUTTONS'|'LIST'|'IMAGE'|'TEMPLATE'|'SYSTEM'; metadata?:Record<string, unknown> };
+export interface WhatsAppProvider { sendText(message:OutboundMessage):Promise<string | void>; sendButtons(message:OutboundMessage):Promise<string | void>; sendList(message:OutboundMessage):Promise<string | void>; sendImage(message:OutboundMessage):Promise<string | void>; sendTemplate(message:OutboundMessage):Promise<string | void>; }
