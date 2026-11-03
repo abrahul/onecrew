@@ -14,9 +14,22 @@ export function CareerForm() {
     const form = e.currentTarget;
     void (async () => {
       try {
-        const response = await fetch('/api/careers/applications', { method: 'POST', body: new FormData(form) });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || 'We could not submit your application. Please try again.');
+        const data = new FormData(form);
+        const uploadBytes = ['drivingLicense', 'aadhaar', 'profilePhoto'].reduce((total, name) => {
+          const value = data.get(name);
+          return total + (value instanceof File ? value.size : 0);
+        }, 0);
+        if (uploadBytes > 4 * 1024 * 1024) throw new Error('Keep the three uploaded files under 4 MB combined. Choose smaller images or PDFs.');
+        const response = await fetch('/api/careers/applications', { method: 'POST', body: data });
+        const raw = await response.text();
+        let result: { error?: string } = {};
+        try { result = raw ? JSON.parse(raw) : {}; } catch { /* Hosting errors can be plain text or HTML. */ }
+        if (!response.ok) {
+          const fallback = response.status === 413 || /request entity|payload too large/i.test(raw)
+            ? 'The uploaded files are too large. Keep all three files under 4 MB combined.'
+            : 'We could not submit your application. Please try again.';
+          throw new Error(result.error || fallback);
+        }
         setSent(true);
       } catch (reason) { setError(reason instanceof Error ? reason.message : 'We could not submit your application. Please try again.'); }
       finally { setSubmitting(false); }
@@ -27,11 +40,11 @@ export function CareerForm() {
     <div className="form-heading"><span className="eyebrow">Quick application</span><h2>Join the ONECREW network.</h2><p>Complete these six details to apply.</p></div>
     <div className="form-grid">
       {field('Full name *', 'name', { required: true, autoComplete: 'name', placeholder: 'Your name' })}
-      {field('Phone number *', 'phone', { required: true, type: 'tel', autoComplete: 'tel', inputMode: 'tel', pattern: '[+0-9 ()-]{8,}', placeholder: '+91 00000 00000' })}
+      {field('Phone number *', 'phone', { required: true, type: 'tel', autoComplete: 'tel', inputMode: 'tel', pattern: '[+0-9 \\(\\)\\-]{8,}', placeholder: '+91 00000 00000' })}
       {field('Years of experience *', 'experience', { required: true, type: 'number', min: 0, max: 60, step: 1, inputMode: 'numeric', placeholder: 'e.g. 3' })}
-      <label className="form-field upload-field">Driving licence *<input type="file" name="drivingLicense" required accept="image/jpeg,image/png,image/webp,application/pdf" /><small>JPG, PNG, WebP or PDF, up to 8 MB.</small></label>
-      <label className="form-field upload-field">Aadhaar card *<input type="file" name="aadhaar" required accept="image/jpeg,image/png,image/webp,application/pdf" /><small>JPG, PNG, WebP or PDF, up to 8 MB.</small></label>
-      <label className="form-field upload-field full-field">Photo *<input type="file" name="profilePhoto" required accept="image/jpeg,image/png,image/webp" /><small>JPG, PNG or WebP, up to 8 MB.</small></label>
+      <label className="form-field upload-field">Driving licence *<input type="file" name="drivingLicense" required accept="image/jpeg,image/png,image/webp,application/pdf" /><small>JPG, PNG, WebP or PDF.</small></label>
+      <label className="form-field upload-field">Aadhaar card *<input type="file" name="aadhaar" required accept="image/jpeg,image/png,image/webp,application/pdf" /><small>JPG, PNG, WebP or PDF.</small></label>
+      <label className="form-field upload-field full-field">Photo *<input type="file" name="profilePhoto" required accept="image/jpeg,image/png,image/webp" /><small>JPG, PNG or WebP. All three uploads combined must be under 4 MB.</small></label>
     </div>
     {error && <p className="form-error" role="alert">{error}</p>}
     <button className="button button-primary" type="submit" disabled={submitting}>{submitting ? 'Submitting…' : 'Apply to ONECREW'} {!submitting && <Arrow diagonal />}</button>
