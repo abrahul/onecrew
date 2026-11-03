@@ -2,6 +2,7 @@ import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectsCommand } from '@aws-sdk/client-s3';
+import { db } from '@/lib/db';
 
 const directory = () => process.env.PRIVATE_UPLOAD_DIR || path.join(process.cwd(), 'private-uploads');
 const accepted = new Set(['image/jpeg', 'image/png', 'image/webp', 'application/pdf']);
@@ -16,6 +17,40 @@ const isR2Configured = () =>
   );
 
 let r2Client: S3Client | null = null;
+let databaseStorageReady: Promise<void> | null = null;
+
+const useDatabaseStorage = () => Boolean(process.env.VERCEL);
+
+function ensureDatabaseStorage() {
+  if (!databaseStorageReady) {
+    databaseStorageReady = db.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "PrivateUpload" (
+        "storageName" TEXT PRIMARY KEY,
+        "data" BYTEA NOT NULL,
+        "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `).then(() => undefined);
+  }
+  return databaseStorageReady;
+}
+
+async function saveDatabaseFile(storageName: string, bytes: Buffer) {
+  await ensureDatabaseStorage();
+  await db.$executeRaw`INSERT INTO "PrivateUpload" ("storageName", "data") VALUES (${storageName}, ${bytes})`;
+}
+
+async function readDatabaseFile(storageName: string) {
+  await ensureDatabaseStorage();
+  const rows = await db.$queryRaw<Array<{ data: Uint8Array }>>`SELECT "data" FROM "PrivateUpload" WHERE "storageName" = ${storageName} LIMIT 1`;
+  if (!rows[0]) throw new Error('File not found in database storage.');
+  return Buffer.from(rows[0].data);
+}
+
+async function removeDatabaseFiles(names: string[]) {
+  await ensureDatabaseStorage();
+  await Promise.all(names.map(name => db.$executeRaw`DELETE FROM "PrivateUpload" WHERE "storageName" = ${name}`));
+}
+
 function getR2Client() {
   if (!r2Client) {
     r2Client = new S3Client({
@@ -57,6 +92,8 @@ export async function savePrivateFile(file: File, kind: 'profile' | 'document') 
       Body: bytes,
       ContentType: file.type,
     }));
+  } else if (useDatabaseStorage()) {
+    await saveDatabaseFile(storageName, bytes);
   } else {
     const folder = directory();
     await mkdir(folder, { recursive: true, mode: 0o700 });
@@ -81,6 +118,11 @@ export async function removePrivateFiles(names: string[]) {
     return;
   }
 
+  if (useDatabaseStorage()) {
+    await removeDatabaseFiles(valid).catch(() => undefined);
+    return;
+  }
+
   for (const name of valid) {
     await rm(path.join(directory(), name), { force: true }).catch(() => undefined);
   }
@@ -98,6 +140,8 @@ export async function readPrivateFile(name: string) {
     const bytes = await res.Body.transformToByteArray();
     return Buffer.from(bytes);
   }
+
+  if (useDatabaseStorage()) return readDatabaseFile(name);
 
   return readFile(path.join(directory(), name));
 }
