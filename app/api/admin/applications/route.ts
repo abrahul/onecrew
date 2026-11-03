@@ -5,7 +5,7 @@ import { db } from '@/lib/db';
 export async function GET(request: NextRequest) {
   if (!await authenticatedAdmin()) return unauthorized();
   const status = request.nextUrl.searchParams.get('status'); const q = request.nextUrl.searchParams.get('q')?.trim().slice(0, 80);
-  const applications = await db.careerApplication.findMany({ where: { ...(status && Object.values(ApplicationStatus).includes(status as ApplicationStatus) ? { status: status as ApplicationStatus } : {}), ...(q ? { OR: [{ fullName: { contains: q, mode: 'insensitive' } }, { phone: { contains: q } }, { primarySkill: { contains: q, mode: 'insensitive' } }] } : {}) }, orderBy: { createdAt: 'desc' }, take: 250, include: { files: { select: { id: true, originalName: true, mimeType: true, size: true } }, convertedWorker: { select: { id: true, fullName: true } } } });
+  const applications = await db.careerApplication.findMany({ where: { ...(status && Object.values(ApplicationStatus).includes(status as ApplicationStatus) ? { status: status as ApplicationStatus } : {}), ...(q ? { OR: [{ fullName: { contains: q, mode: 'insensitive' } }, { phone: { contains: q } }, { primarySkill: { contains: q, mode: 'insensitive' } }] } : {}) }, orderBy: { createdAt: 'desc' }, take: 250, include: { files: { select: { id: true, originalName: true, mimeType: true, size: true, kind: true } }, convertedWorker: { select: { id: true, fullName: true } } } });
   return NextResponse.json(applications);
 }
 export async function PATCH(request: NextRequest) {

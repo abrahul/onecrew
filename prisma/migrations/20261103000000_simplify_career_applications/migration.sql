@@ -1,0 +1,9 @@
+ALTER TABLE "CareerApplication"
+  ALTER COLUMN "phone" DROP NOT NULL,
+  ALTER COLUMN "whatsapp" DROP NOT NULL,
+  ALTER COLUMN "location" DROP NOT NULL,
+  ALTER COLUMN "workerType" DROP NOT NULL,
+  ALTER COLUMN "primarySkill" DROP NOT NULL,
+  ALTER COLUMN "availability" DROP NOT NULL;
+
+ALTER TABLE "ApplicationFile" ADD COLUMN "kind" TEXT;

@@ -22,22 +22,19 @@ export function CareerForm() {
       finally { setSubmitting(false); }
     })();
   }
-  if (sent) return <div className="form-success"><span className="success-check">✓</span><span className="eyebrow">Application received</span><h2>Thank you for your interest.</h2><p>Our team will review your application and contact you if a suitable opportunity is available.</p></div>;
+  if (sent) return <div className="form-success"><span className="success-check">✓</span><span className="eyebrow">Application received</span><h2>Thank you for your interest.</h2><p>Our team will review your application.</p></div>;
   return <form className="application-form" onSubmit={submit}>
-    <div className="form-heading"><span className="eyebrow">Tell us about yourself</span><h2>Join the ONECREW network.</h2><p>Share a few details. If there’s a suitable opportunity, our team will get in touch.</p></div>
-    <div className="form-grid">{field('Full name *', 'name', { required: true, autoComplete: 'name', placeholder: 'Your name' })}{field('Phone number *', 'phone', { required: true, type: 'tel', autoComplete: 'tel', pattern: '[+0-9 ()-]{8,}', placeholder: '+91 00000 00000' })}{field('WhatsApp number *', 'whatsapp', { required: true, type: 'tel', pattern: '[+0-9 ()-]{8,}', placeholder: 'Number with country code' })}{field('Email', 'email', { type: 'email', autoComplete: 'email', placeholder: 'you@example.com' })}{field('Location *', 'location', { required: true, autoComplete: 'address-level2', placeholder: 'City or neighbourhood' })}
-      <label className="form-field">Work type *<select name="workType" required defaultValue=""><option value="" disabled>Select a work type</option><option>Skilled worker</option><option>General worker</option><option>Temporary worker</option><option>Other</option></select></label>
-      {field('Primary skill / job *', 'skill', { required: true, placeholder: 'e.g. Electrician, helper' })}{field('Years of experience', 'experience', { type: 'number', min: 0, max: 60, placeholder: 'e.g. 3' })}{field('Preferred work area', 'area', { placeholder: 'Areas you can travel to' })}
-      <label className="form-field">Availability *<select name="availability" required defaultValue=""><option value="" disabled>Select availability</option><option>Full time</option><option>Part time</option><option>On demand</option><option>Weekends</option></select></label>
-      <label className="form-field full-field">Previous experience<textarea name="previous" rows={3} placeholder="Tell us a little about the work you’ve done" /></label>
-      {field('Languages known', 'languages', { placeholder: 'e.g. Hindi, English' })}{field('Additional skills', 'additional', { placeholder: 'Anything else you can help with' })}
-      <label className="form-field">Profile photo<input type="file" name="profilePhoto" accept="image/jpeg,image/png,image/webp" /><small>JPG, PNG or WebP, up to 8 MB.</small></label>
-      <label className="form-field">Documents<input type="file" name="documents" multiple accept="image/jpeg,image/png,image/webp,application/pdf" /><small>ID proof, certificates or experience documents. Up to 4 files, 8 MB each.</small></label>
+    <div className="form-heading"><span className="eyebrow">Quick application</span><h2>Join the ONECREW network.</h2><p>Complete these five details to apply.</p></div>
+    <div className="form-grid">
+      {field('Full name *', 'name', { required: true, autoComplete: 'name', placeholder: 'Your name' })}
+      {field('Years of experience *', 'experience', { required: true, type: 'number', min: 0, max: 60, step: 1, inputMode: 'numeric', placeholder: 'e.g. 3' })}
+      <label className="form-field upload-field">Driving licence *<input type="file" name="drivingLicense" required accept="image/jpeg,image/png,image/webp,application/pdf" /><small>JPG, PNG, WebP or PDF, up to 8 MB.</small></label>
+      <label className="form-field upload-field">Aadhaar card *<input type="file" name="aadhaar" required accept="image/jpeg,image/png,image/webp,application/pdf" /><small>JPG, PNG, WebP or PDF, up to 8 MB.</small></label>
+      <label className="form-field upload-field full-field">Photo *<input type="file" name="profilePhoto" required accept="image/jpeg,image/png,image/webp" /><small>JPG, PNG or WebP, up to 8 MB.</small></label>
     </div>
-    <label className="consent"><input type="checkbox" name="consent" required /><span>I agree to be contacted by ONECREW regarding work opportunities. *</span></label>
     {error && <p className="form-error" role="alert">{error}</p>}
     <button className="button button-primary" type="submit" disabled={submitting}>{submitting ? 'Submitting…' : 'Apply to ONECREW'} {!submitting && <Arrow diagonal />}</button>
-    <p className="form-footnote">Your application and attached documents are sent securely to ONECREW for review.</p>
+    <p className="form-footnote">By applying, you agree that ONECREW may securely review these details for work opportunities.</p>
   </form>;
 }
 
