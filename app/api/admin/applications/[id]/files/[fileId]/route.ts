@@ -5,7 +5,10 @@ import { readPrivateFile } from '@/lib/private-files';
 export const runtime = 'nodejs';
 export async function GET(_request: NextRequest, context: { params: { id: string; fileId: string } }) {
   if (!await authenticatedAdmin()) return unauthorized();
-  const file = await db.applicationFile.findFirst({ where: { id: context.params.fileId, applicationId: context.params.id } });
+  const file = await db.applicationFile.findFirst({
+    where: { id: context.params.fileId, applicationId: context.params.id },
+    select: { id: true, originalName: true, storageName: true, mimeType: true, size: true },
+  });
   if (!file) return NextResponse.json({ error: 'File not found.' }, { status: 404 });
   try {
     const data = await readPrivateFile(file.storageName);

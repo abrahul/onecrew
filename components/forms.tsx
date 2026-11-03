@@ -24,9 +24,10 @@ export function CareerForm() {
   }
   if (sent) return <div className="form-success"><span className="success-check">✓</span><span className="eyebrow">Application received</span><h2>Thank you for your interest.</h2><p>Our team will review your application.</p></div>;
   return <form className="application-form" onSubmit={submit}>
-    <div className="form-heading"><span className="eyebrow">Quick application</span><h2>Join the ONECREW network.</h2><p>Complete these five details to apply.</p></div>
+    <div className="form-heading"><span className="eyebrow">Quick application</span><h2>Join the ONECREW network.</h2><p>Complete these six details to apply.</p></div>
     <div className="form-grid">
       {field('Full name *', 'name', { required: true, autoComplete: 'name', placeholder: 'Your name' })}
+      {field('Phone number *', 'phone', { required: true, type: 'tel', autoComplete: 'tel', inputMode: 'tel', pattern: '[+0-9 ()-]{8,}', placeholder: '+91 00000 00000' })}
       {field('Years of experience *', 'experience', { required: true, type: 'number', min: 0, max: 60, step: 1, inputMode: 'numeric', placeholder: 'e.g. 3' })}
       <label className="form-field upload-field">Driving licence *<input type="file" name="drivingLicense" required accept="image/jpeg,image/png,image/webp,application/pdf" /><small>JPG, PNG, WebP or PDF, up to 8 MB.</small></label>
       <label className="form-field upload-field">Aadhaar card *<input type="file" name="aadhaar" required accept="image/jpeg,image/png,image/webp,application/pdf" /><small>JPG, PNG, WebP or PDF, up to 8 MB.</small></label>
