@@ -5,9 +5,97 @@ import { Arrow } from './brand';
 
 const field = (label: string, name: string, props: React.InputHTMLAttributes<HTMLInputElement> = {}) => <label className="form-field">{label}<input name={name} {...props} /></label>;
 
+const uploadFields = ['drivingLicense', 'aadhaar', 'profilePhoto'] as const;
+const safeCombinedUploadBytes = Math.floor(3.8 * 1024 * 1024);
+
+const imageAsJpeg = (canvas: HTMLCanvasElement, quality: number) => new Promise<Blob>((resolve, reject) => {
+  canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Could not optimize an uploaded image.')), 'image/jpeg', quality);
+});
+
+async function compressImage(file: File, targetBytes: number) {
+  if (file.size <= targetBytes) return file;
+
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const image = new Image();
+    image.src = objectUrl;
+    await image.decode();
+
+    const largestSide = Math.max(image.naturalWidth, image.naturalHeight);
+    const initialScale = Math.min(1, 2400 / largestSide);
+    let width = Math.max(1, Math.round(image.naturalWidth * initialScale));
+    let height = Math.max(1, Math.round(image.naturalHeight * initialScale));
+    let smallest: Blob | null = null;
+
+    for (let sizePass = 0; sizePass < 5; sizePass += 1) {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext('2d');
+      if (!context) throw new Error('Could not optimize an uploaded image.');
+      context.fillStyle = '#fff';
+      context.fillRect(0, 0, width, height);
+      context.drawImage(image, 0, 0, width, height);
+
+      for (const quality of [0.86, 0.7, 0.55, 0.42]) {
+        const blob = await imageAsJpeg(canvas, quality);
+        if (!smallest || blob.size < smallest.size) smallest = blob;
+        if (blob.size <= targetBytes) {
+          const jpegName = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+          return new File([blob], jpegName, { type: 'image/jpeg', lastModified: file.lastModified });
+        }
+      }
+
+      width = Math.max(1, Math.round(width * 0.8));
+      height = Math.max(1, Math.round(height * 0.8));
+    }
+
+    if (smallest && smallest.size < file.size) {
+      const jpegName = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+      return new File([smallest], jpegName, { type: 'image/jpeg', lastModified: file.lastModified });
+    }
+    return file;
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
+async function optimizeUploads(data: FormData) {
+  const uploads = uploadFields.map(name => ({ name, file: data.get(name) })).filter(
+    (entry): entry is { name: typeof uploadFields[number]; file: File } => entry.file instanceof File,
+  );
+  const originalBytes = uploads.reduce((total, { file }) => total + file.size, 0);
+  if (originalBytes <= safeCombinedUploadBytes) return;
+
+  const pdfBytes = uploads.reduce((total, { file }) => total + (file.type === 'application/pdf' ? file.size : 0), 0);
+  const images = uploads.filter(({ file }) => file.type.startsWith('image/'));
+  if (!images.length || pdfBytes >= safeCombinedUploadBytes) {
+    throw new Error('The PDF uploads are too large to optimize automatically. Choose smaller PDF files.');
+  }
+
+  let remainingBudget = safeCombinedUploadBytes - pdfBytes;
+  let remainingOriginalImageBytes = images.reduce((total, { file }) => total + file.size, 0);
+  for (const { name, file } of images) {
+    const targetBytes = Math.max(80 * 1024, Math.floor(remainingBudget * file.size / remainingOriginalImageBytes));
+    const compressed = await compressImage(file, targetBytes);
+    data.set(name, compressed);
+    remainingBudget -= compressed.size;
+    remainingOriginalImageBytes -= file.size;
+  }
+
+  const optimizedBytes = uploadFields.reduce((total, name) => {
+    const value = data.get(name);
+    return total + (value instanceof File ? value.size : 0);
+  }, 0);
+  if (optimizedBytes > safeCombinedUploadBytes) {
+    throw new Error('These files could not be reduced enough. Choose smaller images or PDFs.');
+  }
+}
+
 export function CareerForm() {
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [optimizing, setOptimizing] = useState(false);
   const [error, setError] = useState('');
   function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault(); setSubmitting(true); setError('');
@@ -15,11 +103,9 @@ export function CareerForm() {
     void (async () => {
       try {
         const data = new FormData(form);
-        const uploadBytes = ['drivingLicense', 'aadhaar', 'profilePhoto'].reduce((total, name) => {
-          const value = data.get(name);
-          return total + (value instanceof File ? value.size : 0);
-        }, 0);
-        if (uploadBytes > 4 * 1024 * 1024) throw new Error('Keep the three uploaded files under 4 MB combined. Choose smaller images or PDFs.');
+        setOptimizing(true);
+        await optimizeUploads(data);
+        setOptimizing(false);
         const response = await fetch('/api/careers/applications', { method: 'POST', body: data });
         const raw = await response.text();
         let result: { error?: string } = {};
@@ -32,7 +118,7 @@ export function CareerForm() {
         }
         setSent(true);
       } catch (reason) { setError(reason instanceof Error ? reason.message : 'We could not submit your application. Please try again.'); }
-      finally { setSubmitting(false); }
+      finally { setOptimizing(false); setSubmitting(false); }
     })();
   }
   if (sent) return <div className="form-success"><span className="success-check">✓</span><span className="eyebrow">Application received</span><h2>Thank you for your interest.</h2><p>Our team will review your application.</p></div>;
@@ -44,10 +130,10 @@ export function CareerForm() {
       {field('Years of experience *', 'experience', { required: true, type: 'number', min: 0, max: 60, step: 1, inputMode: 'numeric', placeholder: 'e.g. 3' })}
       <label className="form-field upload-field">Driving licence *<input type="file" name="drivingLicense" required accept="image/jpeg,image/png,image/webp,application/pdf" /><small>JPG, PNG, WebP or PDF.</small></label>
       <label className="form-field upload-field">Aadhaar card *<input type="file" name="aadhaar" required accept="image/jpeg,image/png,image/webp,application/pdf" /><small>JPG, PNG, WebP or PDF.</small></label>
-      <label className="form-field upload-field full-field">Photo *<input type="file" name="profilePhoto" required accept="image/jpeg,image/png,image/webp" /><small>JPG, PNG or WebP. All three uploads combined must be under 4 MB.</small></label>
+      <label className="form-field upload-field full-field">Photo *<input type="file" name="profilePhoto" required accept="image/jpeg,image/png,image/webp" /><small>JPG, PNG or WebP. Large images are compressed automatically. PDFs must fit within the 4 MB combined limit.</small></label>
     </div>
     {error && <p className="form-error" role="alert">{error}</p>}
-    <button className="button button-primary" type="submit" disabled={submitting}>{submitting ? 'Submitting…' : 'Apply to ONECREW'} {!submitting && <Arrow diagonal />}</button>
+    <button className="button button-primary" type="submit" disabled={submitting}>{optimizing ? 'Optimizing files…' : submitting ? 'Submitting…' : 'Apply to ONECREW'} {!submitting && <Arrow diagonal />}</button>
     <p className="form-footnote">By applying, you agree that ONECREW may securely review these details for work opportunities.</p>
   </form>;
 }
