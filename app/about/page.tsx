@@ -1,7 +1,154 @@
 import type { Metadata } from 'next';
-import { PageIntro } from '@/components/page-intro';
-import { WhatsAppCTA } from '@/components/whatsapp-cta';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Arrow } from '@/components/brand';
-export const metadata: Metadata = { title: 'About ONECREW', description: 'Learn how ONECREW connects people and businesses with the workforce they need.' };
-export default function About() { return <><PageIntro eyebrow="A better way to get work done" title="Connecting people with the workforce they need." copy="ONECREW helps bring customers, businesses and workers together around the work that matters every day." /><section className="inner-content about-page"><div className="wrap"><div className="about-lead"><div className="about-quote-mark">“</div><h2>Good work happens when people and opportunity <em>find each other.</em></h2><p>From everyday tasks at home to skilled jobs, temporary teams and urgent requirements, ONECREW makes it easier to ask for the right kind of help.</p></div><div className="mission-grid"><article><span className="eyebrow">01 / Our mission</span><h3>Make workforce access feel simple.</h3><p>We connect people who need a hand with people ready to bring their time, care and skills to the job.</p></article><article><span className="eyebrow">02 / Our approach</span><h3>Listen first. Match thoughtfully.</h3><p>Every request is different. We start by understanding the work, location and timing, then help find a suitable way forward.</p></article><article><span className="eyebrow">03 / Our promise</span><h3>Keep people at the centre.</h3><p>Clear communication, a helpful response and respect for the people doing the work guide how we serve homes and businesses.</p></article></div><div className="about-bottom"><div><span className="eyebrow">The crew goes both ways</span><h2>Looking for your next<br/><em>work opportunity?</em></h2><p>Tell us about your experience and the work you’re looking for.</p></div><Link className="button button-outline" href="/careers">Explore careers <Arrow /></Link></div><div className="about-cta"><span>Need workforce for a job?</span><WhatsAppCTA /></div></div></section></>; }
+import { PageIntro } from '@/components/page-intro';
+import { WhatsAppCTA } from '@/components/whatsapp-cta';
+
+export const metadata: Metadata = {
+  title: 'About ONECREW',
+  description:
+    'ONECREW is a workforce service platform connecting customers with suitable workers and creating flexible work opportunities across Kerala.',
+};
+
+const missionPoints = [
+  'Connect customers with suitable workers.',
+  'Create more employment opportunities.',
+  'Make workforce booking simple and convenient.',
+  'Build trust through professional service and transparent communication.',
+  'Support individuals in finding flexible work opportunities.',
+];
+
+const reasons = [
+  'Easy workforce booking.',
+  'Opportunities for freshers and experienced workers.',
+  'Flexible work opportunities.',
+  'Customer-focused service.',
+  'A growing platform for workforce connections.',
+];
+
+export default function About() {
+  return (
+    <>
+      <PageIntro
+        eyebrow="About ONECREW"
+        title="Your Daily Workforce Partner."
+        copy="Connecting People. Empowering Workers. Building Better Communities."
+      />
+
+      <section className="inner-content about-page">
+        <div className="wrap">
+          <div className="about-overview">
+            <span className="eyebrow">Who we are</span>
+            <h2>Making workforce connections <em>simpler for everyone.</em></h2>
+            <div className="about-overview-copy">
+              <p>
+                ONECREW is a workforce service platform built with a vision to make hiring reliable,
+                simple, and accessible for everyone.
+              </p>
+              <p>
+                We aim to bridge the gap between people who need workers and individuals who are
+                looking for work opportunities.
+              </p>
+              <p>
+                Whether it&apos;s a home requirement, daily assistance, general helper services, or
+                business workforce support, ONECREW aims to make finding the right workforce easier
+                through a simple and convenient booking experience.
+              </p>
+            </div>
+          </div>
+
+          <div className="about-direction-grid">
+            <article className="vision-card">
+              <span className="about-card-number">01</span>
+              <span className="eyebrow eyebrow-light">Our vision</span>
+              <h2>From Kerala to every part of India.</h2>
+              <p>
+                To become a trusted workforce service platform across Kerala and expand our services
+                to every part of India.
+              </p>
+            </article>
+
+            <article className="mission-card">
+              <span className="about-card-number">02</span>
+              <span className="eyebrow">Our mission</span>
+              <h2>Opportunity, access, and trust.</h2>
+              <ul className="about-check-list">
+                {missionPoints.map((point) => (
+                  <li key={point}><i aria-hidden="true" />{point}</li>
+                ))}
+              </ul>
+            </article>
+          </div>
+
+          <section className="about-reasons" aria-labelledby="why-onecrew">
+            <div className="about-reasons-heading">
+              <span className="eyebrow">Why ONECREW?</span>
+              <h2 id="why-onecrew">Built around the needs of <em>people and work.</em></h2>
+            </div>
+            <ol className="about-reason-list">
+              {reasons.map((reason, index) => (
+                <li key={reason}>
+                  <span>{String(index + 1).padStart(2, '0')}</span>
+                  <p>{reason}</p>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          <section className="founder-message" aria-labelledby="founder-message-title">
+            <figure className="founder-portrait">
+              <Image
+                src="/images/syam-krishnan-ceo.png"
+                alt="Syam Krishnan, Founder and CEO of ONECREW"
+                width={1089}
+                height={1444}
+                sizes="(max-width: 820px) calc(100vw - 84px), 280px"
+              />
+              <figcaption>
+                <strong>Syam Krishnan</strong>
+                <span>Founder &amp; CEO</span>
+              </figcaption>
+            </figure>
+            <div className="founder-message-heading">
+              <span className="eyebrow eyebrow-light">A message from the founder</span>
+              <h2 id="founder-message-title">One simple idea.<br />A bigger vision.</h2>
+            </div>
+            <div className="founder-quote">
+              <span className="founder-quote-mark" aria-hidden="true">&ldquo;</span>
+              <blockquote>
+                <p>
+                  ONECREW was born from a simple idea — connecting people who need work done with
+                  people who are ready to work.
+                </p>
+                <p>
+                  We believe that every worker deserves an opportunity and every customer deserves
+                  reliable support.
+                </p>
+                <p>Our journey starts in Kerala, with a vision to build something bigger.</p>
+              </blockquote>
+              <div className="founder-signature">
+                <strong>Syam Krishnan</strong>
+                <span>Founder &amp; CEO — ONECREW</span>
+              </div>
+            </div>
+          </section>
+
+          <div className="about-next-step">
+            <div>
+              <span className="eyebrow">ONECREW</span>
+              <h2>Your Daily Workforce Partner.</h2>
+              <p>Need workforce, or ready to find your next work opportunity?</p>
+            </div>
+            <div className="about-next-actions">
+              <WhatsAppCTA message="Hi ONECREW, I would like to book a worker.">Book a Worker</WhatsAppCTA>
+              <Link className="button button-outline" href="/careers">
+                Join ONECREW <Arrow />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
