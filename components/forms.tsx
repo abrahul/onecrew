@@ -1,11 +1,12 @@
 'use client';
 import { useState } from 'react';
 import { whatsappUrl } from '@/lib/config';
+import { professionOptions } from '@/lib/professions';
 import { Arrow } from './brand';
 
 const field = (label: string, name: string, props: React.InputHTMLAttributes<HTMLInputElement> = {}) => <label className="form-field">{label}<input name={name} {...props} /></label>;
 
-const uploadFields = ['drivingLicense', 'aadhaar', 'profilePhoto'] as const;
+const uploadFields = ['drivingLicenseFront', 'drivingLicenseBack', 'aadhaar', 'profilePhoto'] as const;
 const safeCombinedUploadBytes = Math.floor(3.8 * 1024 * 1024);
 
 const imageAsJpeg = (canvas: HTMLCanvasElement, quality: number) => new Promise<Blob>((resolve, reject) => {
@@ -62,7 +63,7 @@ async function compressImage(file: File, targetBytes: number) {
 
 async function optimizeUploads(data: FormData) {
   const uploads = uploadFields.map(name => ({ name, file: data.get(name) })).filter(
-    (entry): entry is { name: typeof uploadFields[number]; file: File } => entry.file instanceof File,
+    (entry): entry is { name: typeof uploadFields[number]; file: File } => entry.file instanceof File && entry.file.size > 0,
   );
   const originalBytes = uploads.reduce((total, { file }) => total + file.size, 0);
   if (originalBytes <= safeCombinedUploadBytes) return;
@@ -96,6 +97,7 @@ export function CareerForm() {
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [optimizing, setOptimizing] = useState(false);
+  const [profession, setProfession] = useState('');
   const [error, setError] = useState('');
   function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault(); setSubmitting(true); setError('');
@@ -112,7 +114,7 @@ export function CareerForm() {
         try { result = raw ? JSON.parse(raw) : {}; } catch { /* Hosting errors can be plain text or HTML. */ }
         if (!response.ok) {
           const fallback = response.status === 413 || /request entity|payload too large/i.test(raw)
-            ? 'The uploaded files are too large. Keep all three files under 4 MB combined.'
+            ? 'The uploaded files are too large. Keep all files under 4 MB combined.'
             : 'We could not submit your application. Please try again.';
           throw new Error(result.error || fallback);
         }
@@ -123,12 +125,15 @@ export function CareerForm() {
   }
   if (sent) return <div className="form-success"><span className="success-check">✓</span><span className="eyebrow">Application received</span><h2>Thank you for your interest.</h2><p>Our team will review your application.</p></div>;
   return <form className="application-form" onSubmit={submit}>
-    <div className="form-heading"><span className="eyebrow">Quick application</span><h2>Join the ONECREW network.</h2><p>Complete these six details to apply.</p></div>
+    <div className="form-heading"><span className="eyebrow">Quick application</span><h2>Join the ONECREW network.</h2><p>Complete the details below to apply.</p></div>
     <div className="form-grid">
       {field('Full name *', 'name', { required: true, autoComplete: 'name', placeholder: 'Your name' })}
       {field('Phone number *', 'phone', { required: true, type: 'tel', autoComplete: 'tel', inputMode: 'tel', pattern: '[+0-9 \\(\\)\\-]{8,}', placeholder: '+91 00000 00000' })}
+      <label className="form-field">Profession *<select name="profession" required value={profession} onChange={event => setProfession(event.target.value)}><option value="" disabled>Select your profession</option>{professionOptions.map(option => <option key={option} value={option}>{option}</option>)}</select></label>
+      {profession === 'Other' && field('Other profession *', 'otherProfession', { required: true, maxLength: 80, placeholder: 'Enter your profession' })}
       {field('Years of experience *', 'experience', { required: true, type: 'number', min: 0, max: 60, step: 1, inputMode: 'numeric', placeholder: 'e.g. 3' })}
-      <label className="form-field upload-field">Driving licence *<input type="file" name="drivingLicense" required accept="image/jpeg,image/png,image/webp,application/pdf" /><small>JPG, PNG, WebP or PDF.</small></label>
+      <label className="form-field upload-field">Driving licence — front (optional)<input type="file" name="drivingLicenseFront" accept="image/jpeg,image/png,image/webp,application/pdf" /><small>JPG, PNG, WebP or PDF.</small></label>
+      <label className="form-field upload-field">Driving licence — back (optional)<input type="file" name="drivingLicenseBack" accept="image/jpeg,image/png,image/webp,application/pdf" /><small>JPG, PNG, WebP or PDF.</small></label>
       <label className="form-field upload-field">Aadhaar card *<input type="file" name="aadhaar" required accept="image/jpeg,image/png,image/webp,application/pdf" /><small>JPG, PNG, WebP or PDF.</small></label>
       <label className="form-field upload-field full-field">Photo *<input type="file" name="profilePhoto" required accept="image/jpeg,image/png,image/webp" /><small>JPG, PNG or WebP. Large images are compressed automatically. PDFs must fit within the 4 MB combined limit.</small></label>
     </div>
