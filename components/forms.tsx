@@ -5,6 +5,10 @@ import { professionOptions } from '@/lib/professions';
 import { Arrow } from './brand';
 
 const field = (label: string, name: string, props: React.InputHTMLAttributes<HTMLInputElement> = {}) => <label className="form-field">{label}<input name={name} {...props} /></label>;
+const experienceOptions = Array.from({ length: 21 }, (_, years) => ({
+  value: String(years),
+  label: years === 0 ? 'Fresher / no experience' : years === 1 ? '1 year' : years === 20 ? '20+ years' : `${years} years`,
+}));
 
 const uploadFields = ['drivingLicenseFront', 'drivingLicenseBack', 'aadhaar', 'profilePhoto'] as const;
 const safeCombinedUploadBytes = Math.floor(3.8 * 1024 * 1024);
@@ -131,7 +135,8 @@ export function CareerForm() {
       {field('Phone number *', 'phone', { required: true, type: 'tel', autoComplete: 'tel', inputMode: 'tel', pattern: '[+0-9 \\(\\)\\-]{8,}', placeholder: '+91 00000 00000' })}
       <label className="form-field">Profession *<select name="profession" required value={profession} onChange={event => setProfession(event.target.value)}><option value="" disabled>Select your profession</option>{professionOptions.map(option => <option key={option} value={option}>{option}</option>)}</select></label>
       {profession === 'Other' && field('Other profession *', 'otherProfession', { required: true, maxLength: 80, placeholder: 'Enter your profession' })}
-      {field('Years of experience *', 'experience', { required: true, type: 'number', min: 0, max: 60, step: 1, inputMode: 'numeric', placeholder: 'e.g. 3' })}
+      <label className="form-field">Experience *<select name="experience" required defaultValue=""><option value="" disabled>Select experience</option>{experienceOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
+      {field('Preferred work location *', 'preferredArea', { required: true, maxLength: 160, autoComplete: 'address-level2', placeholder: 'City, district or area' })}
       <label className="form-field upload-field">Driving licence — front (optional)<input type="file" name="drivingLicenseFront" accept="image/jpeg,image/png,image/webp,application/pdf" /><small>JPG, PNG, WebP or PDF.</small></label>
       <label className="form-field upload-field">Driving licence — back (optional)<input type="file" name="drivingLicenseBack" accept="image/jpeg,image/png,image/webp,application/pdf" /><small>JPG, PNG, WebP or PDF.</small></label>
       <label className="form-field upload-field">Aadhaar card *<input type="file" name="aadhaar" required accept="image/jpeg,image/png,image/webp,application/pdf" /><small>JPG, PNG, WebP or PDF.</small></label>

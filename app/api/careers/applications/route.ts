@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
   const profession = text(form, 'profession', 80);
   const otherProfession = text(form, 'otherProfession', 80);
   const primarySkill = profession === 'Other' ? otherProfession : profession;
+  const preferredArea = text(form, 'preferredArea', 160);
   const experience = text(form, 'experience', 3);
   const years = Number(experience);
   const drivingLicenseFront = uploadedFile(form, 'drivingLicenseFront') || uploadedFile(form, 'drivingLicense');
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
   const aadhaar = uploadedFile(form, 'aadhaar');
   const profilePhoto = uploadedFile(form, 'profilePhoto');
 
-  if (!fullName || phone.length < 8 || !experience || !profession || !primarySkill || !aadhaar || !profilePhoto) return badRequest('Complete all required fields with a valid phone number before submitting.');
+  if (!fullName || phone.length < 8 || !experience || !profession || !primarySkill || !preferredArea || !aadhaar || !profilePhoto) return badRequest('Complete all required fields with a valid phone number before submitting.');
   if (!PROFESSIONS.has(profession)) return badRequest('Select a valid profession.');
   if (!Number.isInteger(years) || years < 0 || years > 60) return badRequest('Enter valid experience between 0 and 60 years.');
   if (!profilePhoto.type.startsWith('image/')) return badRequest('Photo must be a JPG, PNG or WebP image.');
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
     let application;
     try {
       application = await db.careerApplication.create({
-        data: { fullName, phone, whatsapp: phone, primarySkill, experience: years, files: { create: saved } },
+        data: { fullName, phone, whatsapp: phone, location: preferredArea, preferredArea, primarySkill, experience: years, files: { create: saved } },
         select: { id: true, createdAt: true },
       });
     } catch (error) {
@@ -77,10 +78,11 @@ export async function POST(request: NextRequest) {
           fullName,
           phone,
           whatsapp: phone,
-          location: '',
+          location: preferredArea,
           workerType: 'OTHER',
           primarySkill,
           experience: years,
+          preferredArea,
           availability: 'Not specified',
           files: { create: saved.map(({ kind: _kind, ...file }) => file) },
         },

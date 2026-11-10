@@ -6,7 +6,7 @@ import { removePrivateFiles } from '@/lib/private-files';
 export async function GET(request: NextRequest) {
   if (!await authenticatedAdmin()) return unauthorized();
   const status = request.nextUrl.searchParams.get('status'); const q = request.nextUrl.searchParams.get('q')?.trim().slice(0, 80);
-  const where = { ...(status && Object.values(ApplicationStatus).includes(status as ApplicationStatus) ? { status: status as ApplicationStatus } : {}), ...(q ? { OR: [{ fullName: { contains: q, mode: 'insensitive' as const } }, { phone: { contains: q } }, { primarySkill: { contains: q, mode: 'insensitive' as const } }] } : {}) };
+  const where = { ...(status && Object.values(ApplicationStatus).includes(status as ApplicationStatus) ? { status: status as ApplicationStatus } : {}), ...(q ? { OR: [{ fullName: { contains: q, mode: 'insensitive' as const } }, { phone: { contains: q } }, { primarySkill: { contains: q, mode: 'insensitive' as const } }, { preferredArea: { contains: q, mode: 'insensitive' as const } }, { location: { contains: q, mode: 'insensitive' as const } }] } : {}) };
   try {
     const applications = await db.careerApplication.findMany({ where, orderBy: { createdAt: 'desc' }, take: 250, include: { files: { select: { id: true, originalName: true, mimeType: true, size: true, kind: true } }, convertedWorker: { select: { id: true, fullName: true } } } });
     return NextResponse.json(applications);
