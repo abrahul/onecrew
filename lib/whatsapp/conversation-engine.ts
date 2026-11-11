@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 import { db } from '@/lib/db';
 import { getWhatsAppProvider } from './provider-factory';
 import { MetaSendError } from './meta-provider';
+import { business } from '@/lib/config';
 export type Incoming = { phone:string; name?:string; message:string; messageId:string; type?:string; metadata?:Record<string,unknown> };
 const categories = ['Home Services','Daily Labour','Skilled Worker','Business Workforce','Emergency Help'];
 const services = ['Electrician','Plumber','Carpenter','AC Technician','Welder'];
@@ -16,14 +17,18 @@ export async function processIncomingWhatsAppMessage(input:Incoming) {
     let state = c.state;
     const update:Prisma.WhatsAppConversationUpdateInput = {lastMessageAt:new Date()};
     const m = input.message.trim(), command = m.toLowerCase();
-    let reply = 'Please answer the last question, or type Help, Cancel or Restart.';
+    const humanSupport = `Call ${business.phone} or email ${business.email} during ${business.hours}.`;
+    let reply = 'Please answer the last question, or type Help, Cancel, STOP or Restart.';
+    let shouldReply = true;
     let items:string[] | undefined;
-    if (command === 'cancel') { state='CANCELLED'; reply='Enquiry cancelled. Type Restart to start again.'; }
-    else if (command === 'help') { state='HUMAN_SUPPORT'; reply='Your enquiry is saved for our team to review and follow up.'; }
+    if (command === 'stop') { state='CANCELLED'; reply=`Automated WhatsApp messages stopped. Type Restart only if you want to begin again. For support, ${humanSupport}`; }
+    else if (command === 'cancel') { state='CANCELLED'; reply=`Enquiry cancelled. For a confirmed booking cancellation or refund, ${humanSupport} Type Restart to start a new enquiry.`; }
+    else if (command === 'help' || command === 'support' || command === 'human') { state='HUMAN_SUPPORT'; reply=`Human support requested. Your enquiry is saved for our team. ${humanSupport}`; }
     else if (command === 'restart' || command === 'edit' || state === 'START') {
       Object.assign(update,{category:null,service:null,location:null,date:null,time:null,duration:null,numberOfWorkers:null,requirements:null,estimatedAmount:null,paymentStatus:null});
       state='CATEGORY_SELECTION'; reply='Welcome to ONECREW! What do you need today?'; items=categories;
-    } else if (state === 'HUMAN_SUPPORT' || state === 'PAYMENT_SUBMITTED') reply='Message saved for our team. Payment verification and official booking creation require admin review.';
+    } else if (state === 'CANCELLED') shouldReply=false;
+    else if (state === 'HUMAN_SUPPORT' || state === 'PAYMENT_SUBMITTED') reply=`Message saved for our team. Payment verification and official booking creation require admin review. ${humanSupport}`;
     else if (input.metadata?.mediaId && !['PAYMENT_PENDING','PRICE_CONFIRMATION'].includes(state)) reply='Attachment saved for our team. Please also answer the last question in text.';
     else if (state === 'CATEGORY_SELECTION') {
       if (categories.includes(m)) {update.category=m;state='SERVICE_SELECTION';reply='Choose a service.';items=services;} else {reply='Choose a category.';items=categories;}
@@ -39,7 +44,7 @@ export async function processIncomingWhatsAppMessage(input:Incoming) {
     else if (state === 'SUMMARY' && command === 'confirm') {state='PRICE_CONFIRMATION';reply='Enquiry saved. Our team will review availability and send a quote and payment instructions. After paying, reply PAID or send a receipt. An admin must verify payment and explicitly create your booking.';}
     else if (['PRICE_CONFIRMATION','PAYMENT_PENDING'].includes(state) && (command === 'paid' || input.metadata?.mediaId)) {update.paymentStatus='PAYMENT_SUBMITTED';state='PAYMENT_SUBMITTED';reply='Payment confirmation received for manual verification. This does not confirm payment or create a booking. Our team will follow up.';}
     const conversation = await tx.whatsAppConversation.update({where:{id:c.id},data:{...update,state}});
-    await tx.whatsAppMessage.create({data:{conversationId:c.id,direction:'OUTBOUND',messageType:items?'LIST':'TEXT',content:reply,metadata:items?{items}:{},sendState:'PENDING'}});
+    if (shouldReply) await tx.whatsAppMessage.create({data:{conversationId:c.id,direction:'OUTBOUND',messageType:items?'LIST':'TEXT',content:reply,metadata:items?{items}:{},sendState:'PENDING'}});
     return {conversation};
   },{timeout:10000});
   await flushWhatsAppOutbox(phone);

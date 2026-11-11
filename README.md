@@ -7,7 +7,7 @@ ONECREW combines a public service website with a private operations dashboard an
 ## Configure
 
 1. Copy `.env.example` to `.env` for local Prisma commands and Next.js.
-2. Set a PostgreSQL `DATABASE_URL`, ONECREW’s real contact details, `NEXT_PUBLIC_SITE_URL` and the local business time zone.
+2. Set a PostgreSQL `DATABASE_URL`, the ONECREW WhatsApp number and the local business time zone. Public business identity is maintained in `lib/config.ts` so it stays consistent across deployments.
 3. Set a strong, unique `ADMIN_PASSWORD` (14+ characters) and `ADMIN_EMAIL` for the initial admin account.
 4. Set `PRIVATE_UPLOAD_DIR` to a private directory for local development. Vercel deployments store uploads privately in PostgreSQL unless Cloudflare R2 is configured.
 

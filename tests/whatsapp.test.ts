@@ -50,6 +50,14 @@ test('engine duplicates do not transition again and pending replies resume',asyn
     assert.equal(state,'PRICE_CONFIRMATION');
     const payment=await processIncomingWhatsAppMessage({...incoming,messageId:'payment',message:'PAID'});
     assert.equal(payment.conversation?.paymentStatus,'PAYMENT_SUBMITTED');
+    state='START';
+    await processIncomingWhatsAppMessage({...incoming,messageId:'stop',message:'STOP'});
+    assert.equal(state,'CANCELLED');assert.match(rows.at(-1).content,/messages stopped/i);
+    const stoppedRowCount=rows.length;
+    await processIncomingWhatsAppMessage({...incoming,messageId:'after-stop',message:'Hello?'});
+    assert.equal(rows.length,stoppedRowCount);
+    await processIncomingWhatsAppMessage({...incoming,messageId:'restart',message:'Restart'});
+    assert.equal(state,'CATEGORY_SELECTION');
     // Fake transaction intentionally has no booking model: any automatic booking write fails this test.
   } finally {(db as any).$transaction=original;}
 });
